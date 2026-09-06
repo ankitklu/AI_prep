@@ -1,0 +1,7 @@
+langchain
+langchain-core
+langchain-openai
+python-dotenv
+langchain-mistralai
+langchain-community
+langchain-google-genai
