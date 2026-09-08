@@ -1,0 +1,6 @@
+python-dotenv
+requests
+langchain
+langchain-core
+langchain-huggingface
+tavily-python
