@@ -4,3 +4,5 @@ langchain
 langchain-core
 langchain-huggingface
 tavily-python
+langchain-google-genai
+streamlit
