@@ -2,14 +2,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
-import requests 
+import requests
 
-from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 from langchain.tools import tool
-from langchain_core.messages import HumanMessage
 from tavily import TavilyClient
-from rich import print  
+from rich import print
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.agents import create_agent
+from langchain.agents.middleware import HumanInTheLoopMiddleware
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.types import Command
 
 # Now let;s create some tools that we can use to get weather information. We will create two tools: one for getting the current weather and another for getting the weather forecast.
 
@@ -55,18 +57,18 @@ def get_news(city: str) -> str:
 
     if not results:
         return f"No news found for {city}"
-    
+
     news_list = []
-    
+
     for r in results:
         title = r.get("title", "No title")
         url = r.get("url", "")
         snippet = r.get("content", "")
-        
+
         news_list.append(
             f"- {title}\n  🔗 {url}\n  📝 {snippet[:100]}..."
         )
-    
+
     return f"Latest news in {city}:\n\n" + "\n\n".join(news_list)
 
 # print(get_news.invoke("Bangalore"))
@@ -75,68 +77,67 @@ def get_news(city: str) -> str:
 
 llm = ChatGoogleGenerativeAI(model="gemini-3.6-flash")
 
-tools = {
-    "get_weather": get_weather,
-    "get_news": get_news
-}
+# create_agent builds a LangGraph agent internally; HumanInTheLoopMiddleware pauses
+# (via an interrupt) before running any tool listed in interrupt_on, and a checkpointer
+# is required so the paused run can be resumed with the human's decision.
+agent = create_agent(
+    llm,
+    tools=[get_weather, get_news],
+    system_prompt="You are a helpful city assistant.",
+    middleware=[
+        HumanInTheLoopMiddleware(interrupt_on={"get_weather": True, "get_news": True})
+    ],
+    checkpointer=InMemorySaver(),
+)
 
-llm_with_tool = llm.bind_tools([get_weather, get_news])
+
+def extract_text(content) -> str:
+    """gemini-3.6-flash returns AIMessage.content as a list of content blocks
+    (with 'extras'/thought-signature metadata) rather than a plain string."""
+    if isinstance(content, str):
+        return content
+    return "".join(
+        block.get("text", "") for block in content if isinstance(block, dict)
+    )
+
 
 #Agent LOOP
 
 def run_cli():
-    messages = []
+    config = {"configurable": {"thread_id": "cli-session"}}
 
-    print("City intelligence System")
-    print("type Exit to quit")
+    print("City Agent | type exit to quit")
 
     while True:
         user_input = input("You: ")
 
         if user_input.lower() == "exit":
-            print("Exiting...")
+            print("Exit.....")
             break
 
-        messages.append(HumanMessage(content=user_input))
+        result = agent.invoke(
+            {"messages": [{"role": "user", "content": user_input}]},
+            config=config,
+        )
 
-        while True:
-            # NOTE: gemini-3.6-flash attaches a `thought_signature` to function-call
-            # responses, and the installed langchain-google-genai version doesn't yet
-            # round-trip it. Replaying an AIMessage with tool_calls (or a ToolMessage)
-            # back to the model raises a 400 "missing thought_signature" error, so we
-            # never put those back into `messages` — tool results are fed back as
-            # plain text instead.
-            result = llm_with_tool.invoke(messages)
+        #HUMAN IN THE LOOP: keep resuming while a tool call is pending approval
+        while "__interrupt__" in result:
+            action_requests = result["__interrupt__"][0].value["action_requests"]
 
-            #if tool is required
+            decisions = []
+            for action in action_requests:
+                confirm = input(
+                    f"Agent wants to call {action['name']} with {action['args']} Approve(Yes/No): "
+                )
+                if confirm.lower() == "no":
+                    print("tool call denied and i cannot get the info...")
+                    decisions.append({"type": "reject", "message": "User denied this tool call."})
+                else:
+                    decisions.append({"type": "approve"})
 
-            if result.tool_calls:
-                for tool_call in result.tool_calls:
-                    tool_name = tool_call['name']
+            result = agent.invoke(Command(resume={"decisions": decisions}), config=config)
 
-                    #HUMAN IN THE LOOP
-                    confirm = input(f"Agent wants to call {tool_name} Approve(Yes/No): ")
-
-                    if confirm.lower() == "no":
-                        print("tool call denied and i cannot get the info...")
-                        messages.append(HumanMessage(
-                            content=f"Tool call to {tool_name} was denied by the user."
-                        ))
-                        continue
-
-                    #execute tool
-                    tool_result = tools[tool_name].invoke(tool_call['args'])
-
-                    messages.append(HumanMessage(
-                        content=f"Tool {tool_name} was called with args {tool_call['args']} and returned: {tool_result}"
-                    ))
-
-                continue
-
-            else:
-                messages.append(result)
-                print(result.content)
-                break
+        print(extract_text(result["messages"][-1].content))
 
 
 if __name__ == "__main__":
