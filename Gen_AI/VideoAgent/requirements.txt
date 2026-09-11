@@ -2,7 +2,11 @@
 # Python >= 3.10 recommended
 
 # ── Audio / Video acquisition ─────────────────────────────────────────────────
-yt-dlp>=2024.4.9                  # Download audio from YouTube URLs
+# yt-dlp is NOT installed here — recent yt-dlp releases require Python >= 3.10,
+# while this project's venv is pinned to 3.9 for torch/whisper compatibility.
+# It runs instead from an isolated venv: see .venv-ytdlp (create with
+# `python3.12 -m venv .venv-ytdlp && .venv-ytdlp/bin/pip install yt-dlp`),
+# invoked via subprocess from utils/audio_processor.py.
 pydub>=0.25.1                     # Audio file manipulation / format conversion
 ffmpeg-python>=0.2.0              # FFmpeg bindings (FFmpeg binary must be installed separately)
 
