@@ -1,9 +1,21 @@
 import whisper
 import os
+import requests
+from pydub import AudioSegment
+
+# Sarvam's sync STT-translate API rejects audio longer than 30s.
+# We slice each chunk into 25s pieces (with a 5s safety margin) before sending.
+SARVAM_PIECE_SECONDS = 25
 
 WHISPER_MODEL = os.getenv("WHISPER_MODEL","small")
 
 _model = None
+
+SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
+SARVAM_STT_TRANSLATE_URL = "https://api.sarvam.ai/speech-to-text-translate"
+SARVAM_MODEL = os.getenv("SARVAM_STT_MODEL", "saaras:v2.5")
+
+
 
 def load_model():
     global _model
