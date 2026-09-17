@@ -10,3 +10,5 @@ sentence-transformers
 
 faiss-cpu
 pypdf
+
+streamlit
