@@ -71,6 +71,8 @@ approved_result = hitl_agent.invoke(
     config=config    # Same thread_id resumes the paused session
 ))
 
+
+
 print("=== Approved! Final response ===")
 print(approved_result["messages"][-1].content)
 
