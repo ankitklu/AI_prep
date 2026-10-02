@@ -1,0 +1,10 @@
+langchain
+langchain_openai
+langchain_core
+python_dotenv
+langchain-groq
+langchain-huggingface
+huggingface_hub
+langgraph
+langsmith
+sentence-transformers
