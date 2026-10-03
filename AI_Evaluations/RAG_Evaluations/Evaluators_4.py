@@ -4,6 +4,8 @@
 # - Mode: "Requires a ground truth (reference) answer supplied through a dataset"
 # - Evaluator: use LLM as judge to assess correctness
 
+import os
+
 from langsmith import Client
 
 from typing_extensions import Annotated, TypedDict
@@ -182,7 +184,7 @@ def target(inputs: dict) -> dict:
     return rag_bot(inputs["question"])
 
 dataset_name = "RAG Test Evaluation"
-
+ 
 experiment_results = client.evaluate(
     target,
     data=dataset_name,
