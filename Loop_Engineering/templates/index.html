@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Loop Agent · Self-Correcting Multi-Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- Ambient background -->
+  <div class="bg" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="grid"></div>
+    <div class="noise"></div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <defs>
+          <linearGradient id="bm" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#a78bfa" />
+            <stop offset=".5" stop-color="#22d3ee" />
+            <stop offset="1" stop-color="#f472b6" />
+          </linearGradient>
+        </defs>
+        <circle cx="20" cy="20" r="14" fill="none" stroke="url(#bm)" stroke-width="3" stroke-dasharray="66 22" stroke-linecap="round" />
+        <circle cx="20" cy="20" r="4" fill="url(#bm)" />
+      </svg>
+      <span class="brand-name">Loop<span class="dim">Agent</span></span>
+    </div>
+    <div class="pill" id="modelPill">
+      <span class="dot"></span>
+      <span id="modelText">Groq · LangGraph</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <p class="eyebrow reveal" style="--d:0">Self-correcting multi-agent loop</p>
+      <h1 class="reveal" style="--d:1">Write. Review. <em>Refine.</em></h1>
+      <p class="lede reveal" style="--d:2">
+        A writer drafts, a strict reviewer critiques, a reviser fixes it, and the loop keeps going until the answer passes.
+      </p>
+
+      <form class="composer reveal" style="--d:3" id="form" autocomplete="off">
+        <div class="composer-inner">
+          <svg class="composer-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z" fill="currentColor"/></svg>
+          <textarea id="topic" rows="1" placeholder="Explain a topic… e.g. What is an AI Agent?" maxlength="300"></textarea>
+          <button class="run-btn" id="runBtn" type="submit">
+            <span class="run-label">Run loop</span>
+            <svg class="run-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+        </div>
+      </form>
+      <div class="chips reveal" style="--d:4" id="chips">
+        <button type="button" class="chip">What is an AI Agent?</button>
+        <button type="button" class="chip">How does RAG work?</button>
+        <button type="button" class="chip">What is gradient descent?</button>
+        <button type="button" class="chip">Why do LLMs hallucinate?</button>
+      </div>
+      <p class="hint reveal" style="--d:5"><kbd>Enter</kbd> to run · <kbd>Shift</kbd> + <kbd>Enter</kbd> for a new line</p>
+    </section>
+
+    <section class="stage" id="stage" hidden>
+      <!-- Graph + stats -->
+      <div class="col">
+        <article class="card glow-card" id="graphCard">
+          <div class="card-head">
+            <h2>Agent graph</h2>
+            <span class="status" id="status"><span class="status-dot"></span><span id="statusText">Idle</span></span>
+          </div>
+
+          <svg class="graph" id="graph" viewBox="0 0 620 290" role="img" aria-label="Writer, reviewer, reviser loop">
+            <defs>
+              <linearGradient id="edgeGrad" x1="0" x2="1">
+                <stop offset="0" stop-color="#a78bfa" />
+                <stop offset="1" stop-color="#22d3ee" />
+              </linearGradient>
+              <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0L10 5L0 10z" fill="currentColor" />
+              </marker>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="b" />
+                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
+
+            <!-- edges -->
+            <g class="edges">
+              <path class="edge" id="e-start-writer"     d="M52 100 L120 100" marker-end="url(#arrow)" />
+              <path class="edge" id="e-writer-reviewer"  d="M240 100 L320 100" marker-end="url(#arrow)" />
+              <path class="edge" id="e-reviewer-end"     d="M440 100 L556 100" marker-end="url(#arrow)" />
+              <path class="edge loop" id="e-reviewer-reviser" d="M420 126 C478 148, 478 192, 420 210" marker-end="url(#arrow)" />
+              <path class="edge loop" id="e-reviser-reviewer" d="M340 210 C282 192, 282 148, 340 126" marker-end="url(#arrow)" />
+            </g>
+            <text class="edge-label" x="480" y="90">pass</text>
+            <text class="edge-label" x="502" y="172">revise</text>
+            <text class="edge-label" x="252" y="172">re-check</text>
+
+            <!-- terminals -->
+            <g class="terminal" id="n-start"><circle cx="40" cy="100" r="12" /><text x="40" y="132">START</text></g>
+            <g class="terminal" id="n-end"><circle cx="570" cy="100" r="12" /><circle class="end-core" cx="570" cy="100" r="5" /><text x="570" y="132">END</text></g>
+
+            <!-- agent nodes -->
+            <g class="node" id="n-writer" data-agent="writer">
+              <rect class="node-halo" x="114" y="68" width="132" height="64" rx="20" />
+              <rect class="node-body" x="120" y="74" width="120" height="52" rx="16" />
+              <text class="node-title" x="180" y="98">Writer</text>
+              <text class="node-sub" x="180" y="114">drafts</text>
+            </g>
+            <g class="node" id="n-reviewer" data-agent="reviewer">
+              <rect class="node-halo" x="314" y="68" width="132" height="64" rx="20" />
+              <rect class="node-body" x="320" y="74" width="120" height="52" rx="16" />
+              <text class="node-title" x="380" y="98">Reviewer</text>
+              <text class="node-sub" x="380" y="114">verifies</text>
+            </g>
+            <g class="node" id="n-reviser" data-agent="reviser">
+              <rect class="node-halo" x="314" y="204" width="132" height="64" rx="20" />
+              <rect class="node-body" x="320" y="210" width="120" height="52" rx="16" />
+              <text class="node-title" x="380" y="234">Reviser</text>
+              <text class="node-sub" x="380" y="250">improves</text>
+            </g>
+
+            <circle class="particle" id="particle" r="5" cx="-20" cy="-20" filter="url(#glow)" />
+          </svg>
+        </article>
+
+        <div class="stats">
+          <div class="stat card glow-card">
+            <span class="stat-label">Revisions</span>
+            <span class="stat-value" id="statRevisions">0</span>
+          </div>
+          <div class="stat card glow-card">
+            <span class="stat-label">Verdict</span>
+            <span class="stat-value" id="statDecision">—</span>
+          </div>
+          <div class="stat card glow-card">
+            <span class="stat-label">Steps</span>
+            <span class="stat-value" id="statSteps">0</span>
+          </div>
+          <div class="stat card glow-card">
+            <span class="stat-label">Time</span>
+            <span class="stat-value" id="statTime">0.0s</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trace -->
+      <article class="card glow-card trace-card">
+        <div class="card-head">
+          <h2>Agent trace</h2>
+          <button class="ghost-btn" id="replayBtn" type="button" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Replay
+          </button>
+        </div>
+        <ol class="timeline" id="timeline"></ol>
+        <div class="skeletons" id="skeletons">
+          <div class="sk"></div><div class="sk"></div><div class="sk short"></div>
+        </div>
+      </article>
+
+      <!-- Final answer -->
+      <article class="card glow-card final" id="final" hidden>
+        <div class="card-head">
+          <h2>Final answer</h2>
+          <div class="final-actions">
+            <span class="badge" id="finalBadge">PASS</span>
+            <button class="ghost-btn" id="copyBtn" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+              <span>Copy</span>
+            </button>
+          </div>
+        </div>
+        <p class="final-topic" id="finalTopic"></p>
+        <div class="prose" id="finalText"></div>
+
+        <div class="meter">
+          <div class="meter-head">
+            <span>Word count</span>
+            <span><b id="wordCount">0</b> words · target 120–160</span>
+          </div>
+          <div class="meter-track">
+            <div class="meter-band"></div>
+            <div class="meter-fill" id="meterFill"></div>
+            <div class="meter-pin" id="meterPin"></div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="foot">Built with LangGraph · FastAPI · <span id="footModel">Groq</span></footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
