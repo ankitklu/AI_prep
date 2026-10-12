@@ -49,15 +49,15 @@ The manual solution is documented in `FIX_REFERENCE.md`, but the video is strong
 
 
 
-testsprite project create --type frontend --name "LoopCart proj" --url https://loopcart-testsprite-demo.vercel.app/
+testsprite project create --type frontend --name "LoopCart proj" --url https://loopxtestsprite.vercel.app/
 
 
 
-21b253bb-5cfd-49a9-8e98-63edadf2b8d7
+0296929d-a28e-43a3-a20b-5db80201c0d5
 
 
 
-npm run testsprite:plan -- proj_21b253bb-5cfd-49a9-8e98-63edadf2b8d7
+npm run testsprite:plan -- proj_0296929d-a28e-43a3-a20b-5db80201c0d5
 
 
 
