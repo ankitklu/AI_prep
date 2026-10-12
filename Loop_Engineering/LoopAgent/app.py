@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from starlette.requests import Request
 import uvicorn
 
-from backend import run_workflow
+from Loop_Engineering.LoopAgent.backend import run_workflow
 
 BASE_DIR = Path(__file__).resolve().parent
 

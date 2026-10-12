@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="LoopCart demo application for a TestSprite loop-engineering video." />
+    <title>LoopCart — TestSprite Demo</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero-panel" aria-labelledby="page-title">
+        <div>
+          <span class="eyebrow">Loop engineering demo</span>
+          <h1 id="page-title">LoopCart Checkout</h1>
+          <p>
+            A tiny live application with one realistic regression for an AI coding agent to detect,
+            fix, deploy, and verify.
+          </p>
+        </div>
+        <div class="loop-badge" aria-label="Loop: Build, verify, fix, rerun">
+          <span>Build</span><b>→</b><span>Verify</span><b>→</b><span>Fix</span><b>→</b><span>Rerun</span>
+        </div>
+      </section>
+
+      <section class="checkout-grid">
+        <div class="card cart-card">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Your cart</span>
+              <h2>Developer essentials</h2>
+            </div>
+            <span class="pill">2 items</span>
+          </div>
+
+          <div class="items-list">
+            <article class="cart-item">
+              <div class="product-icon" aria-hidden="true">⌨️</div>
+              <div class="product-copy">
+                <h3>AI Mechanical Keyboard</h3>
+                <p>Low-profile keyboard for long coding sessions</p>
+                <span>Qty 1</span>
+              </div>
+              <strong>$60.00</strong>
+            </article>
+
+            <article class="cart-item">
+              <div class="product-icon" aria-hidden="true">📘</div>
+              <div class="product-copy">
+                <h3>Agent Engineering Notebook</h3>
+                <p>Plan prompts, tools, feedback gates, and stop conditions</p>
+                <span>Qty 1</span>
+              </div>
+              <strong>$40.00</strong>
+            </article>
+          </div>
+
+          <form class="coupon-form" id="coupon-form">
+            <label for="coupon">Coupon code</label>
+            <div class="coupon-row">
+              <input id="coupon" name="coupon" placeholder="Try SAVE20" autocomplete="off" />
+              <button type="submit">Apply coupon</button>
+            </div>
+            <p class="coupon-message" id="coupon-message" role="status">SAVE20 should give 20% off.</p>
+          </form>
+        </div>
+
+        <aside class="card summary-card" aria-label="Order summary">
+          <span class="eyebrow">Order summary</span>
+          <h2>Ready to ship</h2>
+
+          <dl class="summary-list">
+            <div>
+              <dt>Subtotal</dt>
+              <dd id="subtotal">$100.00</dd>
+            </div>
+            <div>
+              <dt>Discount</dt>
+              <dd id="discount">-$0.00</dd>
+            </div>
+            <div>
+              <dt>Shipping</dt>
+              <dd id="shipping">Free</dd>
+            </div>
+          </dl>
+
+          <div class="total-row">
+            <span>Total</span>
+            <strong id="total">$100.00</strong>
+          </div>
+
+          <button class="checkout-button" id="checkout-button" type="button">Complete checkout</button>
+          <p class="checkout-status" id="checkout-status" role="status"></p>
+
+          <div class="trust-note">
+            <span aria-hidden="true">🛡️</span>
+            <p><strong>Live behavior matters.</strong> The verifier should judge what the user actually sees.</p>
+          </div>
+        </aside>
+      </section>
+    </main>
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>

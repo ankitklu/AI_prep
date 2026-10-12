@@ -1,0 +1,11 @@
+{
+  "name": "loopcart-testsprite-demo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs",
+    "build": "node scripts/build.mjs",
+    "testsprite:plan": "node scripts/make-testsprite-plan.mjs"
+  }
+}
