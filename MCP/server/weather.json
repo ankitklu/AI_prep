@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "weather": {
+      "command": "/opt/homebrew/bin/uv",
+      "args": [
+        "--directory",
+        "/Users/ankit.mishra/ankit/ML_prep/MCP",
+        "run",
+        "mcp",
+        "run",
+        "server/weather.py"
+      ]
+    }
+  }
+}

@@ -1,9 +1,9 @@
 from typing import Any
 import httpx
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
-# Intitialize FastMCP server
-mcp = FastMCP("weather")
+# Initialize MCP server
+mcp = MCPServer("weather")
 
 #constants
 NWS_API_BASE = "https://api.weather.gov"
