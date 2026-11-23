@@ -1,0 +1,48 @@
+# Dialog rails: Colang flows decide HOW the bot reacts to each kind of user message.
+# The user message is matched to an intent by embedding similarity (no LLM call),
+# then a flow picks the bot reply. The flows themselves are in rails.co.
+#
+# No OpenAI: "engine: groq" resolves through LangChain's init_chat_model. The embeddings
+# engine is NeMo's own "SentenceTransformers" provider (local, free, no API key) instead
+# of OpenAI's text-embedding-3-small.
+
+models:
+  - type: main
+    engine: groq
+    model: qwen/qwen3.8-27b
+  # Used to embed the example user messages in rails.co and compare them with the real message
+  - type: embeddings
+    engine: SentenceTransformers
+    model: sentence-transformers/all-MiniLM-L6-v2
+
+instructions:
+  - type: general
+    content: |
+      You are the Acme Cloud help assistant. Answer the user's question using only the
+      relevant chunks from the company documents. If the answer is not in them, say
+      "I don't know based on the company documents." Keep answers short.
+
+rails:
+  dialog:
+    user_messages:
+      # Match intents with embeddings only (fast, free, no LLM call).
+      embeddings_only: true
+      # Below this similarity score, no example is "close enough"...
+      embeddings_only_similarity_threshold: 0.45
+      # ...and the message is treated as a normal Acme Cloud question.
+      embeddings_only_fallback_intent: ask question about acme cloud
+
+prompts:
+  # Our own prompt for writing the answer. The "models" line matters: without it,
+  # NeMo's built-in prompt for the resolved model wins (see "Gotchas" in the notebook).
+  - task: generate_bot_message
+    models:
+      - groq/qwen/qwen3.8-27b
+    messages:
+      - type: system
+        content: |
+          {{ general_instructions }}
+
+          Relevant chunks from the company documents:
+          {{ relevant_chunks }}
+      - "{{ history | to_chat_messages }}"

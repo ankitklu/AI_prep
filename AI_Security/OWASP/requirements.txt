@@ -10,6 +10,9 @@ sentence-transformers==6.3.0
 
 # Guardrails (Module 3)
 nemoguardrails==0.24.1
+# Required at import time by nemoguardrails' LangChain integration (NEMOGUARDRAILS_LLM_FRAMEWORK=langchain),
+# which is what lets "engine: groq" resolve in nemo_config/*/config.yml.
+langchain-community==0.4.2
 
 # Web app (app.py)
 streamlit==1.66.1

@@ -1,0 +1,31 @@
+# Regex rails: the cheapest rail. No LLM call, only pattern matching (about 1 ms).
+# Good for blocking known, exact attack phrases. Easy to bypass by rewording.
+#
+# No OpenAI: "engine: groq" resolves through LangChain's init_chat_model (unused by the
+# regex flows themselves, but NeMo's config schema still wants a resolvable main model).
+
+models:
+  - type: main
+    engine: groq
+    model: qwen/qwen3.8-27b
+
+rails:
+  config:
+    regex_detection:
+      input:
+        case_insensitive: true
+        patterns:
+          - 'ignore (all )?(the )?(previous |above |prior )?instructions'
+          - 'system prompt'
+      output:
+        case_insensitive: true
+        patterns:
+          # Any link that is NOT on acmecloud.example (blocks evil.example, phishing links, image beacons)
+          - 'https?://(?!([a-z0-9-]+\.)*acmecloud\.example)'
+
+  input:
+    flows:
+      - regex check input
+  output:
+    flows:
+      - regex check output

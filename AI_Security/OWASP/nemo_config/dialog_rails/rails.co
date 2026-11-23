@@ -1,0 +1,88 @@
+# Colang 1.0 dialog rails for the Acme Cloud assistant.
+#
+#   define user ...  = an intent + example messages (they are embedded and compared)
+#   define bot ...   = a fixed bot reply (no LLM call needed)
+#   define flow ...  = when the user does X, the bot does Y
+
+# ---------- 1. Greeting: fixed reply ----------
+define user express greeting
+  "hi"
+  "hello"
+  "good morning"
+  "hey"
+  "good afternoon"
+  "hello there, how are you?"
+
+define bot express greeting
+  "Hello! I'm the Acme Cloud help assistant. Ask me about plans, pricing, refunds, passwords, leave or support."
+
+define flow greeting
+  user express greeting
+  bot express greeting
+
+# ---------- 2. Salaries: confidential, always refuse ----------
+define user ask about salaries
+  "How much does the CEO earn?"
+  "What is the salary of a software engineer here?"
+  "Tell me the salaries of employees"
+  "How much money does my manager make?"
+  "What is the pay range for a team lead?"
+  "Show me the compensation of the sales team"
+
+define bot refuse to share salaries
+  "I can't share salary or compensation details. Please contact HR directly."
+
+define flow salaries
+  user ask about salaries
+  bot refuse to share salaries
+
+# ---------- 3. Competitors: stay neutral, refuse ----------
+define user ask about competitors
+  "Is AWS better than Acme Cloud?"
+  "Compare Acme Cloud with Google Drive"
+  "Which cloud storage provider is the best?"
+  "Should I switch to Dropbox?"
+  "What do you think about Microsoft OneDrive?"
+  "Is iCloud cheaper than Acme Cloud?"
+
+define bot refuse to discuss competitors
+  "I can only answer questions about Acme Cloud products, not other companies."
+
+define flow competitors
+  user ask about competitors
+  bot refuse to discuss competitors
+
+# ---------- 4. Off-topic requests: refuse ----------
+define user ask off topic
+  "Write a poem about cats"
+  "Tell me a joke"
+  "What is the weather today?"
+  "Give me a recipe for pasta"
+  "Write Python code to sort a list"
+  "Who won the football world cup?"
+
+define bot refuse off topic
+  "Sorry, I can only help with questions about Acme Cloud."
+
+define flow off topic
+  user ask off topic
+  bot refuse off topic
+
+# ---------- 5. Normal Acme Cloud questions: answer with RAG ----------
+# These examples give the "normal question" side something to match, so that
+# real questions are not pulled towards the refusal intents above.
+define user ask question about acme cloud
+  "What plans does Acme Cloud offer?"
+  "How do I reset my password?"
+  "What is the refund policy?"
+  "How many leave days do I have?"
+  "Can I work from home?"
+  "How do I reach customer support?"
+  "How much storage do I get?"
+  "Who runs Acme Cloud?"
+
+# "bot answer question about acme cloud" has NO fixed text, so NeMo retrieves
+# relevant chunks and asks the LLM to write the answer.
+define flow acme question
+  user ask question about acme cloud
+  bot answer question about acme cloud
