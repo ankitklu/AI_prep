@@ -1,0 +1,19 @@
+# LLM app: RAG with LangGraph + Groq (free) instead of OpenAI
+langgraph==1.2.20
+langchain-core==1.7.6
+langchain-groq==1.2.0
+python-dotenv==1.2.4
+
+# Embeddings: local, free, open-source HuggingFace model instead of OpenAI embeddings
+langchain-huggingface==1.2.3
+sentence-transformers==6.3.0
+
+# Guardrails (Module 3)
+nemoguardrails==0.24.1
+
+# Web app (app.py)
+streamlit==1.66.1
+
+# Jupyter notebooks
+ipykernel==7.4.0
+nbformat==5.11.1
