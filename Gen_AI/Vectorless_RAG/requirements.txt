@@ -1,0 +1,5 @@
+pageindex
+groq
+python-dotenv
+langchain-groq
+langchain-core
